@@ -112,18 +112,21 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
         let command = handle_command(sub_matches.values_of("COMMAND"))?;
 
-        tcp(host, port, timeout, command).await
-    } else if let Some(sub_matches) = matches.subcommand_matches("uds") {
+        return tcp(host, port, timeout, command).await;
+    }
+
+    #[cfg(unix)]
+    if let Some(sub_matches) = matches.subcommand_matches("uds") {
         let path = sub_matches.value_of("PATH").unwrap();
         let timeout =
             Duration::from_secs(sub_matches.value_of("TIMEOUT").unwrap().parse::<u32>()? as u64);
 
         let command = handle_command(sub_matches.values_of("COMMAND"))?;
 
-        uds(Path::new(path), timeout, command).await
-    } else {
-        Err("Please input a subcommand. Use `help` to see how to use this program.".into())
+        return uds(Path::new(path), timeout, command).await;
     }
+
+    Err("Please input a subcommand. Use `help` to see how to use this program.".into())
 }
 
 fn get_matches<'a>() -> ArgMatches<'a> {
