@@ -7,7 +7,7 @@ extern crate tokio;
 
 use std::error::Error;
 use std::path::Path;
-use std::process::Command;
+use std::process::{self, Command};
 use std::time::Duration;
 
 #[cfg(unix)]
@@ -34,9 +34,9 @@ fn exec(sources: Vec<&str>) -> Result<(), Box<dyn Error>> {
 
     command.args(iter);
 
-    command.spawn()?;
+    let exit_status = command.spawn()?.wait()?;
 
-    Ok(())
+    process::exit(exit_status.code().unwrap_or(-1));
 }
 
 async fn tcp(
@@ -45,22 +45,24 @@ async fn tcp(
     timeout: Duration,
     command: Vec<&str>,
 ) -> Result<(), Box<dyn Error>> {
-    let host_with_port = format!("{}:{}", host, port);
+    {
+        let host_with_port = format!("{}:{}", host, port);
 
-    let start = Instant::now();
+        let start = Instant::now();
 
-    if timeout.is_zero() {
-        while TcpStream::connect(host_with_port.as_str()).await.is_err() {
-            sleep(SLEEP_INTERVAL).await;
-        }
-    } else {
-        while let Err(err) =
-            time::timeout(timeout, TcpStream::connect(host_with_port.as_str())).await?
-        {
-            if Instant::now() - start > timeout {
-                return Err(err.into());
-            } else {
+        if timeout.is_zero() {
+            while TcpStream::connect(host_with_port.as_str()).await.is_err() {
                 sleep(SLEEP_INTERVAL).await;
+            }
+        } else {
+            while let Err(err) =
+                time::timeout(timeout, TcpStream::connect(host_with_port.as_str())).await?
+            {
+                if Instant::now() - start > timeout {
+                    return Err(err.into());
+                } else {
+                    sleep(SLEEP_INTERVAL).await;
+                }
             }
         }
     }
@@ -72,18 +74,20 @@ async fn tcp(
 
 #[cfg(unix)]
 async fn uds(path: &Path, timeout: Duration, command: Vec<&str>) -> Result<(), Box<dyn Error>> {
-    let start = Instant::now();
+    {
+        let start = Instant::now();
 
-    if timeout.is_zero() {
-        while UnixStream::connect(path).await.is_err() {
-            sleep(SLEEP_INTERVAL).await;
-        }
-    } else {
-        while let Err(err) = time::timeout(timeout, UnixStream::connect(path)).await? {
-            if Instant::now() - start > timeout {
-                return Err(err.into());
-            } else {
+        if timeout.is_zero() {
+            while UnixStream::connect(path).await.is_err() {
                 sleep(SLEEP_INTERVAL).await;
+            }
+        } else {
+            while let Err(err) = time::timeout(timeout, UnixStream::connect(path)).await? {
+                if Instant::now() - start > timeout {
+                    return Err(err.into());
+                } else {
+                    sleep(SLEEP_INTERVAL).await;
+                }
             }
         }
     }
