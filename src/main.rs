@@ -9,10 +9,12 @@ extern crate dnsclient;
 
 use std::error::Error;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
-use std::path::Path;
 use std::process::{self, Command};
 use std::str::FromStr;
 use std::time::Duration;
+
+#[cfg(unix)]
+use std::path::Path;
 
 #[cfg(unix)]
 use tokio::net::UnixStream;
@@ -55,25 +57,20 @@ async fn tcp(
         let ips = match IpAddr::from_str(host) {
             Ok(ip) => vec![SocketAddr::new(ip, port)],
             Err(_) => {
+                let dns_servers = vec![
+                    UpstreamServer::new(SocketAddr::new(IpAddr::V4(Ipv4Addr::new(1, 1, 1, 1)), 53)),
+                    UpstreamServer::new(SocketAddr::new(IpAddr::V4(Ipv4Addr::new(8, 8, 8, 8)), 53)),
+                    UpstreamServer::new(SocketAddr::new(IpAddr::V4(Ipv4Addr::new(4, 4, 4, 4)), 53)),
+                ];
+
+                #[cfg(unix)]
                 let client = match DNSClient::new_with_system_resolvers() {
                     Ok(client) => client,
-                    Err(_) => {
-                        DNSClient::new(vec![
-                            UpstreamServer::new(SocketAddr::new(
-                                IpAddr::V4(Ipv4Addr::new(1, 1, 1, 1)),
-                                53,
-                            )),
-                            UpstreamServer::new(SocketAddr::new(
-                                IpAddr::V4(Ipv4Addr::new(8, 8, 8, 8)),
-                                53,
-                            )),
-                            UpstreamServer::new(SocketAddr::new(
-                                IpAddr::V4(Ipv4Addr::new(4, 4, 4, 4)),
-                                53,
-                            )),
-                        ])
-                    }
+                    Err(_) => DNSClient::new(dns_servers),
                 };
+
+                #[cfg(windows)]
+                let client = DNSClient::new(dns_servers);
 
                 let host_with_port = format!("{}:{}", host, port);
 
