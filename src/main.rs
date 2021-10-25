@@ -5,17 +5,23 @@ extern crate terminal_size;
 
 extern crate tokio;
 
+extern crate dnsclient;
+
 use std::error::Error;
+use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::path::Path;
 use std::process::{self, Command};
+use std::str::FromStr;
 use std::time::Duration;
 
 #[cfg(unix)]
 use tokio::net::UnixStream;
 
 use tokio::net::TcpStream;
-
 use tokio::time::{self, sleep, Instant};
+
+use dnsclient::r#async::DNSClient;
+use dnsclient::UpstreamServer;
 
 use clap::{App, Arg, ArgMatches, SubCommand, Values};
 use terminal_size::terminal_size;
@@ -46,22 +52,54 @@ async fn tcp(
     command: Vec<&str>,
 ) -> Result<(), Box<dyn Error>> {
     {
-        let host_with_port = format!("{}:{}", host, port);
+        let ips = match IpAddr::from_str(host) {
+            Ok(ip) => vec![SocketAddr::new(ip, port)],
+            Err(_) => {
+                let client = match DNSClient::new_with_system_resolvers() {
+                    Ok(client) => client,
+                    Err(_) => {
+                        DNSClient::new(vec![
+                            UpstreamServer::new(SocketAddr::new(
+                                IpAddr::V4(Ipv4Addr::new(1, 1, 1, 1)),
+                                53,
+                            )),
+                            UpstreamServer::new(SocketAddr::new(
+                                IpAddr::V4(Ipv4Addr::new(8, 8, 8, 8)),
+                                53,
+                            )),
+                            UpstreamServer::new(SocketAddr::new(
+                                IpAddr::V4(Ipv4Addr::new(4, 4, 4, 4)),
+                                53,
+                            )),
+                        ])
+                    }
+                };
+
+                let host_with_port = format!("{}:{}", host, port);
+
+                client
+                    .query_addrs(&host_with_port)
+                    .await?
+                    .into_iter()
+                    .map(|ip| SocketAddr::new(ip, port))
+                    .collect()
+            }
+        };
 
         let start = Instant::now();
 
-        if timeout.is_zero() {
-            while TcpStream::connect(host_with_port.as_str()).await.is_err() {
-                sleep(SLEEP_INTERVAL).await;
-            }
-        } else {
-            while let Err(err) =
-                time::timeout(timeout, TcpStream::connect(host_with_port.as_str())).await?
-            {
-                if Instant::now() - start > timeout {
-                    return Err(err.into());
-                } else {
+        for ip in ips {
+            if timeout.is_zero() {
+                while TcpStream::connect(ip).await.is_err() {
                     sleep(SLEEP_INTERVAL).await;
+                }
+            } else {
+                while let Err(err) = time::timeout(timeout, TcpStream::connect(ip)).await? {
+                    if Instant::now() - start > timeout {
+                        return Err(err.into());
+                    } else {
+                        sleep(SLEEP_INTERVAL).await;
+                    }
                 }
             }
         }
