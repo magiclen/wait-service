@@ -87,19 +87,30 @@ async fn tcp(
 
         let start = Instant::now();
 
-        for ip in ips {
-            if timeout.is_zero() {
-                while TcpStream::connect(ip).await.is_err() {
-                    sleep(SLEEP_INTERVAL).await;
-                }
-            } else {
-                while let Err(err) = time::timeout(timeout, TcpStream::connect(ip)).await? {
-                    if Instant::now() - start > timeout {
-                        return Err(err.into());
-                    } else {
-                        sleep(SLEEP_INTERVAL).await;
+        if timeout.is_zero() {
+            'outer: loop {
+                for ip in ips.iter().cloned() {
+                    if TcpStream::connect(ip).await.is_ok() {
+                        break 'outer;
                     }
                 }
+
+                sleep(SLEEP_INTERVAL).await;
+            }
+        } else {
+            'outer_timeout: loop {
+                for ip in ips.iter().cloned() {
+                    match time::timeout(timeout, TcpStream::connect(ip)).await? {
+                        Ok(_) => break 'outer_timeout,
+                        Err(err) => {
+                            if Instant::now() - start > timeout {
+                                return Err(err.into());
+                            }
+                        }
+                    }
+                }
+
+                sleep(SLEEP_INTERVAL).await;
             }
         }
     }
