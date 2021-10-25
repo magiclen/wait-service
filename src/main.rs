@@ -72,16 +72,18 @@ async fn tcp(
                 #[cfg(windows)]
                 let client = DNSClient::new(dns_servers);
 
-                let host_with_port = format!("{}:{}", host, port);
-
                 client
-                    .query_addrs(&host_with_port)
+                    .query_addrs(host)
                     .await?
                     .into_iter()
                     .map(|ip| SocketAddr::new(ip, port))
                     .collect()
             }
         };
+
+        if ips.is_empty() {
+            return Err(format!("Cannot resolve the host: {}", host).into());
+        }
 
         let start = Instant::now();
 
