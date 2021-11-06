@@ -32,7 +32,7 @@ ARGS:
 
 ## The Config File
 
-With the `--json` option, you can input one or more JSON files to import your TCP / UDS services. Each file needs to content a JSON array of objects.
+With the `--json` option, you can input one or more JSON files to import your TCP / UDS services. The content of each file needs to be a JSON array of objects.
 
 For a TCP service, the object format is
 
