@@ -60,6 +60,9 @@ jobs:
       - run: cargo build --target ${{ matrix.target }}
       - run: cargo test --target ${{ matrix.target }}
       - run: cargo doc --target ${{ matrix.target }}
+      - run: cargo build --features json --target ${{ matrix.target }}
+      - run: cargo test --features json --target ${{ matrix.target }}
+      - run: cargo doc --features json --target ${{ matrix.target }}
 
   tests-2:
     strategy:
@@ -83,3 +86,6 @@ jobs:
       - run: cargo build
       - run: cargo test
       - run: cargo doc
+      - run: cargo build --features json
+      - run: cargo test --features json
+      - run: cargo doc --features json

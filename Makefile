@@ -1,7 +1,7 @@
 all: ./target/release/wait-service
 
 ./target/release/wait-service: $(shell find . -type f -iname '*.rs' -o -name 'Cargo.toml' | sed 's/ /\\ /g')
-	cargo build --release
+	cargo build --release --features json
 	strip ./target/release/wait-service
 	
 install:

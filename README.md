@@ -3,26 +3,52 @@ Wait Service
 
 [![CI](https://github.com/magiclen/wait-service/actions/workflows/ci.yml/badge.svg)](https://github.com/magiclen/wait-service/actions/workflows/ci.yml)
 
-Wait Service is a pure rust program to test and wait on the availability of a service.
+Wait Service is a pure rust program to test and wait on the availability of multiple services.
 
 ## Help
 
 ```
 EXAMPLES:
-wait-service tcp -h localhost -p 27017 -t 5 -- npm start   # Wait for localhost:27017 (max 5 seconds) and then run `npm start`
-wait-service uds -p /var/run/app.sock -t 0 -- npm start    # Wait for /var/run/app.sock (forever) and then run `npm start`
+wait-service --tcp localhost:27017 --tcp localhost:27018   -t 5 -- npm start  # Wait for localhost:27017 and localhost:27018 (max 5 seconds) and then run `npm start`
+wait-service --tcp localhost:27017 --uds /var/run/app.sock -t 0 -- npm start  # Wait for localhost:27017 and /var/run/app.sock (forever) and then run `npm start`
+wait-service --uds /var/run/app.sock --json /path/to/json       -- npm start  # Wait for /var/run/app.sock and other services defined in the json file (max 60 seconds) and then run `npm start`
 
 USAGE:
-    wait-service [SUBCOMMAND]
+    wait-service <COMMAND>... --json <JSON>... --tcp <TCP>... --timeout <TIMEOUT> --uds <UDS>...
 
 FLAGS:
     -h, --help       Prints help information
     -V, --version    Prints version information
 
-SUBCOMMANDS:
-    help    Prints this message or the help of the given subcommand(s)
-    tcp     Test and wait on the availability of a TCP service
-    uds     Test and wait on the availability of a UDS service [aliases: unix]
+OPTIONS:
+    -t, --timeout <TIMEOUT>    Sets the timeout in seconds, zero for no timeout [default: 60]
+        --tcp <TCP>...         Test and wait on the availability of TCP services
+        --uds <UDS>...         Test and wait on the availability of UDS services [aliases: unix]
+        --json <JSON>...       Test and wait on the availability of TCP or UDS services
+
+ARGS:
+    <COMMAND>...    Command to execute after service is available
+```
+
+## The Config File
+
+With the `--json` option, you can input one or more JSON files to import your TCP / UDS services. Each file needs to content a JSON array of objects.
+
+For a TCP service, the object format is
+
+```json
+{
+    "host": "example.com",
+    "port": 443
+}
+```
+
+For a UDS service, the object format is
+
+```json
+{
+    "uds": "/path/to/socket_file"
+}
 ```
 
 ## License

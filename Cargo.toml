@@ -1,13 +1,13 @@
 [package]
 name = "wait-service"
-version = "0.1.6"
+version = "0.2.0"
 authors = ["Magic Len <len@magiclen.org>"]
 edition = "2021"
 repository = "https://github.com/magiclen/wait-service"
 homepage = "https://magiclen.org/wait-service"
 keywords = ["wait-for-it", "tcp", "unix", "socket", "uds"]
 categories = ["command-line-utilities"]
-description = "Wait Service is a pure rust program to test and wait on the availability of a service."
+description = "Wait Service is a pure rust program to test and wait on the availability of multiple services."
 readme = "README.md"
 license = "MIT"
 include = ["src/**/*", "Cargo.toml", "README.md", "LICENSE"]
@@ -22,6 +22,15 @@ clap = "2.33.3"
 concat-with = "0.2"
 terminal_size = "0.1"
 
-tokio = { version = "1.12", features = ["rt", "time", "net", "macros"] }
+path-absolutize = { version = "3.0.11", features = ["once_cell_cache"] }
+
+tokio = { version = "1.12", features = ["rt", "time", "net", "sync", "macros"] }
 
 dnsclient = { version = "0.1.16", default-features = false, features = ["async-tokio"] }
+
+serde_json = { version = "1", optional = true }
+serde = { version = "1", optional = true }
+serde_derive = { version = "1", optional = true }
+
+[features]
+json = ["serde", "serde_derive", "serde_json"]
