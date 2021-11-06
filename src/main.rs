@@ -292,7 +292,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
     }
 
+    #[cfg(unix)]
     let task_count = tcp_tasks.len() + uds_tasks.len();
+
+    #[cfg(windows)]
+    let task_count = tcp_tasks.len();
 
     if task_count == 0 {
         eprintln!("Warning: \"No service to wait.\"");
@@ -319,6 +323,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         });
     }
 
+    #[cfg(unix)]
     for uds_task in uds_tasks {
         let sender = sender.clone();
 
