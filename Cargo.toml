@@ -1,6 +1,6 @@
 [package]
 name = "wait-service"
-version = "0.2.3"
+version = "0.2.4"
 authors = ["Magic Len <len@magiclen.org>"]
 edition = "2021"
 repository = "https://github.com/magiclen/wait-service"

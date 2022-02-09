@@ -169,6 +169,7 @@ async fn wait_tcp(tcp_task: &TcpTask, timeout: Duration) -> Result<(), String> {
     Ok(())
 }
 
+#[cfg(unix)]
 async fn wait_uds_handler(uds_task: &UdsTask) -> Result<(), String> {
     while UnixStream::connect(uds_task.uds.as_str()).await.is_err() {
         sleep(SLEEP_INTERVAL).await;
