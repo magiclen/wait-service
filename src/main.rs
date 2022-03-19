@@ -27,7 +27,7 @@ use path_absolutize::Absolutize;
 #[cfg(feature = "json")]
 use serde::Deserialize;
 
-use clap::{Command as ClapCommand, Arg, ArgMatches, Values};
+use clap::{Arg, ArgMatches, Command as ClapCommand, Values};
 use terminal_size::terminal_size;
 
 use concat_with::concat_line;
