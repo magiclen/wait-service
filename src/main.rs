@@ -1,27 +1,3 @@
-#[macro_use]
-extern crate concat_with;
-extern crate clap;
-extern crate terminal_size;
-
-extern crate tokio;
-
-extern crate once_cell;
-
-extern crate dnsclient;
-
-#[cfg(feature = "json")]
-extern crate serde;
-
-#[cfg(feature = "json")]
-#[macro_use]
-extern crate serde_derive;
-
-#[cfg(feature = "json")]
-extern crate serde_json;
-
-#[cfg(any(unix, feature = "json"))]
-extern crate path_absolutize;
-
 use std::error::Error;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::process::{self, Command};
@@ -48,8 +24,13 @@ use dnsclient::UpstreamServer;
 #[cfg(any(unix, feature = "json"))]
 use path_absolutize::Absolutize;
 
-use clap::{App, Arg, ArgMatches, Values};
+#[cfg(feature = "json")]
+use serde::Deserialize;
+
+use clap::{Command as ClapCommand, Arg, ArgMatches, Values};
 use terminal_size::terminal_size;
+
+use concat_with::concat_line;
 
 const APP_NAME: &str = "wait-service";
 const CARGO_PKG_VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -335,7 +316,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 }
 
 fn get_matches() -> ArgMatches {
-    let app = App::new(APP_NAME)
+    let app = ClapCommand::new(APP_NAME)
         .term_width(terminal_size().map(|(width, _)| width.0 as usize).unwrap_or(0))
         .version(CARGO_PKG_VERSION)
         .author(CARGO_PKG_AUTHORS)
@@ -351,7 +332,7 @@ fn get_matches() -> ArgMatches {
         .short('t')
         .takes_value(true)
         .default_value(DEFAULT_TIMEOUT_SECONDS)
-        .help("Sets the timeout in seconds, zero for no timeout");
+        .help("Set the timeout in seconds, zero for no timeout");
 
     let arg_command = Arg::new("COMMAND")
         .required(true)
