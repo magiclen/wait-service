@@ -14,20 +14,17 @@ wait-service --tcp localhost:27017 --uds /var/run/app.sock -t 0 -- npm start  # 
 wait-service --uds /var/run/app.sock --json /path/to/json       -- npm start  # Wait for /var/run/app.sock and other services defined in the json file (max 60 seconds) and then run `npm start`
 
 USAGE:
-    wait-service <COMMAND>... --json <JSON>... --tcp <TCP>... --timeout <TIMEOUT> --uds <UDS>...
-
-FLAGS:
-    -h, --help       Prints help information
-    -V, --version    Prints version information
-
-OPTIONS:
-    -t, --timeout <TIMEOUT>    Sets the timeout in seconds, zero for no timeout [default: 60]
-        --tcp <TCP>...         Test and wait on the availability of TCP services
-        --uds <UDS>...         Test and wait on the availability of UDS services [aliases: unix]
-        --json <JSON>...       Test and wait on the availability of TCP or UDS services
+    wait-service [OPTIONS] <COMMAND>...
 
 ARGS:
     <COMMAND>...    Command to execute after service is available
+
+OPTIONS:
+    -t, --timeout <TIMEOUT>    Set the timeout in seconds, zero for no timeout [default: 60]
+        --tcp <TCP>...         Test and wait on the availability of TCP services
+        --uds <UDS>...         Test and wait on the availability of UDS services [aliases: unix]
+    -h, --help                 Print help information
+    -V, --version              Print version information
 ```
 
 ## The Config File
