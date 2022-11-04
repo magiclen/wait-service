@@ -2,7 +2,7 @@ EXECUTABLE_NAME := wait-service
 
 all: ./target/release/$(EXECUTABLE_NAME)
 
-./target/release/$(EXECUTABLE_NAME): $(shell find . -type f -iname '*.rs' -o -name 'Cargo.toml' | sed 's/ /\\ /g')
+./target/release/$(EXECUTABLE_NAME): $(shell find . -type f -iname '*.rs' -o -name 'Cargo.toml' | grep -v ./target | sed 's/ /\\ /g')
 	cargo build --release --features json
 	strip ./target/release/$(EXECUTABLE_NAME)
 	

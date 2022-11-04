@@ -348,12 +348,12 @@ fn get_matches() -> ArgMatches {
 
     let arg_tcp = if cfg!(unix) {
         if cfg!(feature = "json") {
-            arg_tcp.required_unless_present_any(&["UDS", "JSON"])
+            arg_tcp.required_unless_present_any(["UDS", "JSON"])
         } else {
-            arg_tcp.required_unless_present_any(&["UDS"])
+            arg_tcp.required_unless_present_any(["UDS"])
         }
     } else if cfg!(feature = "json") {
-        arg_tcp.required_unless_present_any(&["JSON"])
+        arg_tcp.required_unless_present_any(["JSON"])
     } else {
         arg_tcp
     };
