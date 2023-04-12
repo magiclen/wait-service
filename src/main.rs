@@ -1,36 +1,31 @@
-use std::error::Error;
-use std::net::{IpAddr, Ipv4Addr, SocketAddr};
-use std::process::{self, Command};
-use std::str::FromStr;
-use std::time::Duration;
-
 #[cfg(any(unix, feature = "json"))]
 use std::path::Path;
-
-#[cfg(unix)]
-use tokio::net::UnixStream;
-
-#[cfg(feature = "json")]
-use tokio::fs;
-use tokio::net::TcpStream;
-use tokio::sync::mpsc;
-use tokio::time::{self, sleep};
-
-use once_cell::sync::Lazy;
-
-use dnsclient::r#async::DNSClient;
-use dnsclient::UpstreamServer;
-
-#[cfg(any(unix, feature = "json"))]
-use path_absolutize::Absolutize;
-
-#[cfg(feature = "json")]
-use serde::Deserialize;
+use std::{
+    error::Error,
+    net::{IpAddr, Ipv4Addr, SocketAddr},
+    process::{self, Command},
+    str::FromStr,
+    time::Duration,
+};
 
 use clap::{Arg, ArgMatches, Command as ClapCommand, Values};
-use terminal_size::terminal_size;
-
 use concat_with::concat_line;
+use dnsclient::{r#async::DNSClient, UpstreamServer};
+use once_cell::sync::Lazy;
+#[cfg(any(unix, feature = "json"))]
+use path_absolutize::Absolutize;
+#[cfg(feature = "json")]
+use serde::Deserialize;
+use terminal_size::terminal_size;
+#[cfg(feature = "json")]
+use tokio::fs;
+#[cfg(unix)]
+use tokio::net::UnixStream;
+use tokio::{
+    net::TcpStream,
+    sync::mpsc,
+    time::{self, sleep},
+};
 
 const APP_NAME: &str = "wait-service";
 const CARGO_PKG_VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -109,14 +104,12 @@ async fn host_port_to_socket_addrs(
 ) -> Result<Vec<SocketAddr>, Box<dyn Error>> {
     match IpAddr::from_str(host) {
         Ok(ip) => Ok(vec![SocketAddr::new(ip, port)]),
-        Err(_) => {
-            Ok(DNS_CLIENT
-                .query_addrs(host)
-                .await?
-                .into_iter()
-                .map(|ip| SocketAddr::new(ip, port))
-                .collect())
-        }
+        Err(_) => Ok(DNS_CLIENT
+            .query_addrs(host)
+            .await?
+            .into_iter()
+            .map(|ip| SocketAddr::new(ip, port))
+            .collect()),
     }
 }
 
@@ -193,14 +186,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
         for e in tcp {
             let (host, port) = match e.rfind(':') {
-                Some(i) => {
-                    (
-                        &e[..i],
-                        e[(i + 1)..]
-                            .parse::<u16>()
-                            .map_err(|_| format!("{} is not a correct port!", &e[(i + 1)..]))?,
-                    )
-                }
+                Some(i) => (
+                    &e[..i],
+                    e[(i + 1)..]
+                        .parse::<u16>()
+                        .map_err(|_| format!("{} is not a correct port!", &e[(i + 1)..]))?,
+                ),
                 None => return Err(format!("{} needs to have a port!", e).into()),
             };
 
@@ -217,7 +208,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
         for e in uds {
             uds_tasks.push(UdsTask {
-                uds: String::from(e),
+                uds: String::from(e)
             });
         }
     }
@@ -276,12 +267,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
             match wait_tcp(&tcp_task, timeout).await {
                 Ok(_) => {
                     sender.send(true).await.unwrap();
-                }
+                },
                 Err(err) => {
                     eprintln!("{}", err);
 
                     sender.send(false).await.unwrap();
-                }
+                },
             }
         });
     }
@@ -294,12 +285,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
             match wait_uds(&uds_task, timeout).await {
                 Ok(_) => {
                     sender.send(true).await.unwrap();
-                }
+                },
                 Err(err) => {
                     eprintln!("{}", err);
 
                     sender.send(false).await.unwrap();
-                }
+                },
             }
         });
     }

@@ -16,12 +16,16 @@ jobs:
         os:
           - ubuntu-latest
         toolchain:
+          - 1.59
           - stable
           - nightly
         target:
           - x86_64-unknown-linux-gnu
           - x86_64-unknown-linux-musl
-    name: Test ${{ matrix.toolchain }} on ${{ matrix.os }} to ${{ matrix.target }}
+        features:
+          -
+          - --features json
+    name: Test ${{ matrix.toolchain }} on ${{ matrix.os }} to ${{ matrix.target }} (${{ matrix.features }})
     runs-on: ${{ matrix.os }}
     steps:
       - name: Install musl-tools (Linux)
@@ -29,19 +33,13 @@ jobs:
           sudo apt update
           sudo apt install musl-tools
         if: matrix.target == 'x86_64-unknown-linux-musl'
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v3
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          profile: minimal
           toolchain: ${{ matrix.toolchain }}
           target: ${{ matrix.target }}
-          override: true
-      - run: cargo build --release --target ${{ matrix.target }}
-      - run: cargo test --release --target ${{ matrix.target }}
-      - run: cargo doc --release --target ${{ matrix.target }}
-      - run: cargo build --release --target ${{ matrix.target }} --features json
-      - run: cargo test --release --target ${{ matrix.target }} --features json
-      - run: cargo doc --release --target ${{ matrix.target }} --features json
+      - run: cargo test --release --target ${{ matrix.target }} ${{ matrix.features }}
+      - run: cargo doc --release --target ${{ matrix.target }} ${{ matrix.features }}
 
   tests-2:
     strategy:
@@ -51,20 +49,19 @@ jobs:
           - macos-latest
           - windows-latest
         toolchain:
+          - 1.59
           - stable
           - nightly
-    name: Test ${{ matrix.toolchain }} on ${{ matrix.os }}
+        features:
+          -
+          - --features json
+    name: Test ${{ matrix.toolchain }} on ${{ matrix.os }} (${{ matrix.features }})
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v3
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          profile: minimal
           toolchain: ${{ matrix.toolchain }}
-          override: true
-      - run: cargo build --release
-      - run: cargo test --release
-      - run: cargo doc --release
-      - run: cargo build --release --features json
-      - run: cargo test --release --features json
-      - run: cargo doc --release --features json
+          target: ${{ matrix.target }}
+      - run: cargo test --release ${{ matrix.features }}
+      - run: cargo doc --release ${{ matrix.features }}

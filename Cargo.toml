@@ -3,6 +3,7 @@ name = "wait-service"
 version = "0.2.7"
 authors = ["Magic Len <len@magiclen.org>"]
 edition = "2021"
+rust-version = "1.59"
 repository = "https://github.com/magiclen/wait-service"
 homepage = "https://magiclen.org/wait-service"
 keywords = ["wait-for-it", "tcp", "unix", "socket", "uds"]
@@ -16,6 +17,7 @@ include = ["src/**/*", "Cargo.toml", "README.md", "LICENSE"]
 lto = true
 codegen-units = 1
 panic = "abort"
+strip = true
 
 [dependencies]
 clap = "3.2.23"
