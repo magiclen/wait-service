@@ -9,7 +9,6 @@ homepage = "https://magiclen.org/wait-service"
 keywords = ["wait-for-it", "tcp", "unix", "socket", "uds"]
 categories = ["command-line-utilities"]
 description = "Wait Service is a pure rust program to test and wait on the availability of multiple services."
-readme = "README.md"
 license = "MIT"
 include = ["src/**/*", "Cargo.toml", "README.md", "LICENSE"]
 
