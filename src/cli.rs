@@ -41,14 +41,17 @@ pub struct CLIArgs {
 
     #[arg(long)]
     #[arg(num_args = 1..)]
-    #[cfg_attr(unix, cfg_attr(feature = "json", arg(required_unless_present_any = ["uds", "json"], required_unless_present = "uds")), cfg_attr(feature = "json", arg(required_unless_present = "json")))]
+    #[cfg_attr(all(unix, feature = "json"), arg(required_unless_present_any = ["uds", "json"]))]
+    #[cfg_attr(all(unix, not(feature = "json")), arg(required_unless_present = "uds"))]
+    #[cfg_attr(all(not(unix), feature = "json"), arg(required_unless_present = "json"))]
     #[arg(help = "Test and wait on the availability of TCP services")]
     pub tcp: Vec<String>,
 
     #[cfg(unix)]
     #[arg(long, visible_alias = "unix")]
     #[arg(num_args = 1..)]
-    #[cfg_attr(feature = "json", arg(required_unless_present_any = ["tcp", "json"]), arg(required_unless_present = "tcp"))]
+    #[cfg_attr(feature = "json", arg(required_unless_present_any = ["tcp", "json"]))]
+    #[cfg_attr(not(feature = "json"), arg(required_unless_present = "tcp"))]
     #[arg(value_hint = clap::ValueHint::FilePath)]
     #[arg(help = "Test and wait on the availability of UDS services")]
     pub uds: Vec<PathBuf>,
@@ -56,7 +59,8 @@ pub struct CLIArgs {
     #[cfg(feature = "json")]
     #[arg(long)]
     #[arg(num_args = 1..)]
-    #[cfg_attr(unix, arg(required_unless_present_any = ["tcp", "uds"]), arg(required_unless_present = "tcp"))]
+    #[cfg_attr(unix, arg(required_unless_present_any = ["tcp", "uds"]))]
+    #[cfg_attr(not(unix), arg(required_unless_present = "tcp"))]
     #[arg(value_hint = clap::ValueHint::FilePath)]
     #[arg(help = "Test and wait on the availability of TCP or UDS services")]
     pub json: Vec<PathBuf>,
