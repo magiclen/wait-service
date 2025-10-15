@@ -78,13 +78,24 @@ fn exec(sources: Vec<String>) -> anyhow::Result<()> {
 
     command.args(iter);
 
-    let exit_status = command
-        .spawn()
-        .with_context(|| anyhow!("{command:?}"))?
-        .wait()
-        .with_context(|| anyhow!("{command:?}"))?;
+    #[cfg(unix)]
+    {
+        use std::os::unix::process::CommandExt;
 
-    process::exit(exit_status.code().unwrap_or(-1));
+        Err(command.exec()).with_context(|| anyhow!("{command:?}"))?
+    }
+
+    // TODO pass signals
+    #[cfg(windows)]
+    {
+        let exit_status = command
+            .spawn()
+            .with_context(|| anyhow!("{command:?}"))?
+            .wait()
+            .with_context(|| anyhow!("{command:?}"))?;
+
+        process::exit(exit_status.code().unwrap_or(-1));
+    }
 }
 
 #[inline]
