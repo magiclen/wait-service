@@ -100,7 +100,7 @@ jobs:
           - macos-latest
           - windows-latest
         toolchain:
-          - "1.70"
+          - "1.74"
         features:
           -
           - --features json
