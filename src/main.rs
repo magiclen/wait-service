@@ -85,7 +85,6 @@ fn exec(sources: Vec<String>) -> anyhow::Result<()> {
         Err(command.exec()).with_context(|| anyhow!("{command:?}"))?
     }
 
-    // TODO pass signals
     #[cfg(windows)]
     {
         let exit_status = command
