@@ -9,13 +9,13 @@ use std::{
     process,
     process::Command,
     str::FromStr,
+    sync::LazyLock,
     time::Duration,
 };
 
-use anyhow::{anyhow, Context};
+use anyhow::{Context, anyhow};
 use cli::*;
-use dnsclient::{r#async::DNSClient, UpstreamServer};
-use once_cell::sync::Lazy;
+use dnsclient::{UpstreamServer, r#async::DNSClient};
 #[cfg(any(unix, feature = "json"))]
 use path_absolutize::Absolutize;
 #[cfg(feature = "json")]
@@ -28,7 +28,7 @@ use tokio::{net::TcpStream, sync::mpsc, time, time::sleep};
 
 const SLEEP_INTERVAL: Duration = Duration::from_millis(500);
 
-static DNS_CLIENT: Lazy<DNSClient> = Lazy::new(|| {
+static DNS_CLIENT: LazyLock<DNSClient> = LazyLock::new(|| {
     let dns_servers = vec![
         UpstreamServer::new(SocketAddr::new(IpAddr::V4(Ipv4Addr::new(1, 1, 1, 1)), 53)),
         UpstreamServer::new(SocketAddr::new(IpAddr::V4(Ipv4Addr::new(8, 8, 8, 8)), 53)),

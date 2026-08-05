@@ -2,8 +2,8 @@
 name = "wait-service"
 version = "0.3.2"
 authors = ["Magic Len <len@magiclen.org>"]
-edition = "2021"
-rust-version = "1.74"
+edition = "2024"
+rust-version = "1.85"
 repository = "https://github.com/magiclen/wait-service"
 homepage = "https://magiclen.org/wait-service"
 keywords = ["wait-for-it", "tcp", "unix", "socket", "uds"]
@@ -25,8 +25,6 @@ terminal_size = "0.4"
 
 anyhow = "1"
 
-once_cell = "1.9"
-
 tokio = { version = "1.12", features = ["rt", "time", "net", "sync", "macros"] }
 
 dnsclient = { version = "0.2", default-features = false, features = ["async-tokio"] }
@@ -34,9 +32,7 @@ dnsclient = { version = "0.2", default-features = false, features = ["async-toki
 serde = { version = "1", features = ["derive"], optional = true }
 serde_json = { version = "1", optional = true }
 
-[dependencies.path-absolutize]
-version = "3"
-features = ["once_cell_cache"]
+path-absolutize = { version = "4", features = ["fixed_workdir"] }
 
 [features]
 json = ["serde", "serde_json"]
