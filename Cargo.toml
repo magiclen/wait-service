@@ -10,7 +10,7 @@ keywords = ["wait-for-it", "tcp", "unix", "socket", "uds"]
 categories = ["command-line-utilities"]
 description = "Wait Service is a pure rust program to test and wait on the availability of multiple services."
 license = "MIT"
-include = ["src/**/*", "Cargo.toml", "README.md", "LICENSE"]
+include = ["src/**/*", "Cargo.toml", "Cargo.lock", "README.md", "LICENSE"]
 
 [profile.release]
 lto = true
