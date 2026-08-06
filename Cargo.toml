@@ -23,7 +23,7 @@ clap = { version = "4.0.17", features = ["derive"] }
 concat-with = "0.2"
 terminal_size = "0.4"
 
-anyhow = "1.0.1"
+anyhow = "1.0.46"
 
 tokio = { version = "1.45", features = ["rt", "time", "net", "macros"] }
 
