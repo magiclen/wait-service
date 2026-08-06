@@ -7,11 +7,13 @@ Wait Service is a pure rust program to test and wait on the availability of mult
 
 ## Help
 
+This is the help output from a Unix build with the `json` feature enabled.
+
 ```
 EXAMPLES:
 wait-service --tcp localhost:27017 --tcp localhost:27018   -t 5 -- npm start   # Wait for localhost:27017 and localhost:27018 (max 5 seconds) and then run `npm start`
 wait-service --tcp localhost:27017 --uds /var/run/app.sock -t 0 -- npm start   # Wait for localhost:27017 and /var/run/app.sock (forever) and then run `npm start`
-wait-service --uds /var/run/app.sock --json /path/to/json       -- npm start   # Wait for /var/run/app.sock and other services defined in the json file (max 60 seconds) and then run `npm start`
+wait-service --json /path/to/json                              -- npm start   # Wait for services defined in the JSON file (max 60 seconds) and then run `npm start`
 
 Usage: wait-service [OPTIONS] -- <COMMAND>...
 
@@ -23,8 +25,8 @@ Options:
       --tcp <TCP>...       Test and wait on the availability of TCP services
       --uds <UDS>...       Test and wait on the availability of UDS services [aliases: unix]
       --json <JSON>...     Test and wait on the availability of TCP or UDS services
-  -h, --help               Print help
-  -V, --version            Print version
+  -h, --help               Print help information
+  -V, --version            Print version information
 ```
 
 ## Services
@@ -44,9 +46,11 @@ wait-service --tcp localhost:27017 localhost:27018       -- npm start
 
 A host name is resolved with the system resolver first, so `/etc/hosts` entries are honored, and a direct DNS query is only used as a fallback. A service that cannot be resolved or connected to yet is retried every 500 milliseconds until the timeout expires.
 
+`--uds` is available only on Unix platforms.
+
 ## The Config File
 
-With the `--json` option, you can input one or more JSON files to import your TCP / UDS services. The content of each file needs to be a JSON array of objects.
+The `--json` option is available only when building with the `json` feature, for example `cargo install wait-service --features json`. It imports TCP services and, on Unix platforms, UDS services from one or more JSON files. The content of each file needs to be a JSON array of objects and may contain only the fields shown below.
 
 For a TCP service, the object format is
 
@@ -64,6 +68,8 @@ For a UDS service, the object format is
     "uds": "/path/to/socket_file"
 }
 ```
+
+UDS objects are supported only on Unix platforms.
 
 ## License
 

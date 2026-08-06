@@ -16,6 +16,7 @@ uninstall:
 
 test:
 	cargo test --verbose
+	cargo test --verbose --features json
 
 clean:
 	cargo clean

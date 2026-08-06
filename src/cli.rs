@@ -11,13 +11,43 @@ const CARGO_PKG_AUTHORS: &str = env!("CARGO_PKG_AUTHORS");
 
 const AFTER_HELP: &str = "Enjoy it! https://magiclen.org";
 
+#[cfg(all(unix, feature = "json"))]
 const APP_ABOUT: &str = concat!(
     "Wait Service is a pure rust program to test and wait on the availability of multiple \
      services\n\nEXAMPLES:\n",
     concat_line!(prefix "wait-service ",
         "--tcp localhost:27017 --tcp localhost:27018   -t 5 -- npm start   # Wait for localhost:27017 and localhost:27018 (max 5 seconds) and then run `npm start`",
         "--tcp localhost:27017 --uds /var/run/app.sock -t 0 -- npm start   # Wait for localhost:27017 and /var/run/app.sock (forever) and then run `npm start`",
-        "--uds /var/run/app.sock --json /path/to/json       -- npm start   # Wait for /var/run/app.sock and other services defined in the json file (max 60 seconds) and then run `npm start`",
+        "--json /path/to/json                              -- npm start   # Wait for services defined in the JSON file (max 60 seconds) and then run `npm start`",
+    )
+);
+
+#[cfg(all(unix, not(feature = "json")))]
+const APP_ABOUT: &str = concat!(
+    "Wait Service is a pure rust program to test and wait on the availability of multiple \
+     services\n\nEXAMPLES:\n",
+    concat_line!(prefix "wait-service ",
+        "--tcp localhost:27017 --tcp localhost:27018   -t 5 -- npm start   # Wait for localhost:27017 and localhost:27018 (max 5 seconds) and then run `npm start`",
+        "--tcp localhost:27017 --uds /var/run/app.sock -t 0 -- npm start   # Wait for localhost:27017 and /var/run/app.sock (forever) and then run `npm start`",
+    )
+);
+
+#[cfg(all(not(unix), feature = "json"))]
+const APP_ABOUT: &str = concat!(
+    "Wait Service is a pure rust program to test and wait on the availability of multiple \
+     services\n\nEXAMPLES:\n",
+    concat_line!(prefix "wait-service ",
+        "--tcp localhost:27017 --tcp localhost:27018 -t 5 -- npm start   # Wait for localhost:27017 and localhost:27018 (max 5 seconds) and then run `npm start`",
+        "--json /path/to/json                            -- npm start   # Wait for services defined in the JSON file (max 60 seconds) and then run `npm start`",
+    )
+);
+
+#[cfg(all(not(unix), not(feature = "json")))]
+const APP_ABOUT: &str = concat!(
+    "Wait Service is a pure rust program to test and wait on the availability of multiple \
+     services\n\nEXAMPLES:\n",
+    concat_line!(prefix "wait-service ",
+        "--tcp localhost:27017 --tcp localhost:27018 -t 5 -- npm start   # Wait for localhost:27017 and localhost:27018 (max 5 seconds) and then run `npm start`",
     )
 );
 
