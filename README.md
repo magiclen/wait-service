@@ -27,6 +27,23 @@ Options:
   -V, --version            Print version
 ```
 
+## Services
+
+Each `--tcp` service is a `host:port` pair. An IPv6 literal has to be bracketed.
+
+```bash
+wait-service --tcp 127.0.0.1:8080 --tcp '[::1]:8080' -- npm start
+```
+
+`--tcp`, `--uds` and `--json` all accept multiple values after a single flag, so these two are equivalent.
+
+```bash
+wait-service --tcp localhost:27017 --tcp localhost:27018 -- npm start
+wait-service --tcp localhost:27017 localhost:27018       -- npm start
+```
+
+A host name is resolved with the system resolver first, so `/etc/hosts` entries are honored, and a direct DNS query is only used as a fallback. A service that cannot be resolved or connected to yet is retried every 500 milliseconds until the timeout expires.
+
 ## The Config File
 
 With the `--json` option, you can input one or more JSON files to import your TCP / UDS services. The content of each file needs to be a JSON array of objects.

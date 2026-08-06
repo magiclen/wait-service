@@ -82,3 +82,14 @@ pub fn get_args() -> CLIArgs {
         },
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// `debug_assert` runs the checks that clap would otherwise only perform when the program is actually started.
+    #[test]
+    fn verify_cli() {
+        CLIArgs::command().debug_assert();
+    }
+}
